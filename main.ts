@@ -20,6 +20,14 @@ function stop_blink (time_in_ms: number) {
         moveMotorZIP.show()
     }
 }
+radio.onReceivedString(function (receivedString) {
+    if (receivedString.compare("beep") == 0) {
+        Kitronik_Move_Motor.beepHorn()
+    }
+    if (receivedString.compare("beeeeeeeep") == 0) {
+        music.playMelody("C5 C5 C5 C5 C5 C5 C5 C5 ", 120)
+    }
+})
 radio.onReceivedValue(function (name, value) {
     if (name.compare("acc_y") == 0) {
         if (value < -300) {
@@ -41,10 +49,11 @@ radio.onReceivedValue(function (name, value) {
 })
 function filter_distance () {
     Kitronik_Move_Motor.setUltrasonicUnits(Kitronik_Move_Motor.Units.Centimeters)
-    if (Kitronik_Move_Motor.measure() != 0 && Kitronik_Move_Motor.measure() != 1019) {
+    if (Kitronik_Move_Motor.measure() != 0 && Kitronik_Move_Motor.measure() < 200) {
         filtered_distance = Kitronik_Move_Motor.measure()
     }
-    radio.sendValue("distance", filtered_distance)
+    radio.sendValue("filterd distance", filtered_distance)
+    radio.sendValue("measured distance", Kitronik_Move_Motor.measure())
 }
 let blink_time = 0
 let filtered_distance = 0
