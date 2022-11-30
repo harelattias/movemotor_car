@@ -20,6 +20,14 @@ function stop_blink (time_in_ms: number) {
         moveMotorZIP.show()
     }
 }
+function ORR (text: string, num: number) {
+    if (text.compare("acc_y") == 0) {
+        last_command_acc_y = num
+    }
+    if (text.compare("acc_x") == 0) {
+        last_command_acc_x = num
+    }
+}
 radio.onReceivedString(function (receivedString) {
     if (receivedString.compare("beep") == 0) {
         Kitronik_Move_Motor.beepHorn()
@@ -29,23 +37,7 @@ radio.onReceivedString(function (receivedString) {
     }
 })
 radio.onReceivedValue(function (name, value) {
-    if (name.compare("acc_y") == 0) {
-        if (value < -300) {
-            filter_distance()
-            if (filtered_distance < 20) {
-                Kitronik_Move_Motor.stop()
-                stop_blink(1500)
-                normal_lights()
-            } else {
-                Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorLeft, Kitronik_Move_Motor.MotorDirection.Forward, 50)
-                Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorRight, Kitronik_Move_Motor.MotorDirection.Forward, 50)
-            }
-        } else if (value > 200) {
-            Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Reverse, 50)
-        } else {
-            Kitronik_Move_Motor.stop()
-        }
-    }
+    ORR(name, value)
 })
 function filter_distance () {
     Kitronik_Move_Motor.setUltrasonicUnits(Kitronik_Move_Motor.Units.Centimeters)
@@ -55,6 +47,8 @@ function filter_distance () {
     radio.sendValue("filterd distance", filtered_distance)
     radio.sendValue("measured distance", Kitronik_Move_Motor.measure())
 }
+let last_command_acc_x = 0
+let last_command_acc_y = 0
 let blink_time = 0
 let filtered_distance = 0
 let moveMotorZIP: Kitronik_Move_Motor.MoveMotorZIP = null
@@ -64,6 +58,24 @@ radio.setGroup(111)
 Kitronik_Move_Motor.motorBalance(Kitronik_Move_Motor.SpinDirections.Right, 1)
 filtered_distance = 100
 blink_time = 250
+last_command_acc_y = 0
+let speed_forward = 0
 basic.forever(function () {
-	
+    speed_forward = Math.round(last_command_acc_y / -10.23)
+    if (speed_forward > 30) {
+        filter_distance()
+        if (filtered_distance < 20) {
+            Kitronik_Move_Motor.stop()
+            stop_blink(1500)
+            normal_lights()
+        } else {
+            Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorLeft, Kitronik_Move_Motor.MotorDirection.Forward, speed_forward)
+            Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorRight, Kitronik_Move_Motor.MotorDirection.Forward, speed_forward)
+        }
+    } else if (speed_forward < -30) {
+        Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorLeft, Kitronik_Move_Motor.MotorDirection.Reverse, 49)
+        Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorRight, Kitronik_Move_Motor.MotorDirection.Reverse, 49)
+    } else {
+        Kitronik_Move_Motor.stop()
+    }
 })
