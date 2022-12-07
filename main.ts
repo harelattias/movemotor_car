@@ -1,18 +1,21 @@
 function FOREVER () {
     speed_forward = last_command_speed_fwd
+    speed_right = last_command_speed_right
+    speed_right_motor = speed_forward - speed_right
+    speed_left_motor = speed_forward + speed_right
+    filter_distance()
     if (speed_forward > 30) {
-        filter_distance()
         if (filtered_distance < 20) {
             Kitronik_Move_Motor.stop()
             stop_blink(1500)
             normal_lights()
         } else {
-            Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorLeft, Kitronik_Move_Motor.MotorDirection.Forward, speed_forward)
-            Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorRight, Kitronik_Move_Motor.MotorDirection.Forward, speed_forward)
+            set_right_motor_speed(speed_forward)
+            set_left_motor_speed2(speed_forward)
         }
     } else if (speed_forward < -30) {
-        Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorLeft, Kitronik_Move_Motor.MotorDirection.Reverse, 49)
-        Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorRight, Kitronik_Move_Motor.MotorDirection.Reverse, 49)
+        set_right_motor_speed(speed_forward)
+        set_left_motor_speed2(speed_forward)
     } else {
         Kitronik_Move_Motor.stop()
     }
@@ -55,6 +58,13 @@ radio.onReceivedString(function (receivedString) {
         music.playMelody("C5 C5 C5 C5 C5 C5 C5 C5 ", 120)
     }
 })
+function set_left_motor_speed2 (speed: number) {
+    if (speed > 0) {
+        Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorLeft, Kitronik_Move_Motor.MotorDirection.Forward, speed)
+    } else {
+        Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorLeft, Kitronik_Move_Motor.MotorDirection.Reverse, speed * -1)
+    }
+}
 radio.onReceivedValue(function (name, value) {
     ORR(name, value)
 })
@@ -66,7 +76,17 @@ function filter_distance () {
     radio.sendValue("filterd distance", filtered_distance)
     radio.sendValue("measured distance", Kitronik_Move_Motor.measure())
 }
+function set_right_motor_speed (speed: number) {
+    if (speed > 0) {
+        Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorRight, Kitronik_Move_Motor.MotorDirection.Forward, speed)
+    } else {
+        Kitronik_Move_Motor.motorOn(Kitronik_Move_Motor.Motors.MotorRight, Kitronik_Move_Motor.MotorDirection.Reverse, speed * -1)
+    }
+}
+let speed_left_motor = 0
+let speed_right_motor = 0
 let last_command_speed_right = 0
+let speed_right = 0
 let speed_forward = 0
 let last_command_speed_fwd = 0
 let blink_time = 0
