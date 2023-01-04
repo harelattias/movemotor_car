@@ -43,9 +43,6 @@ radio.onReceivedString(function (receivedString) {
     if (receivedString.compare("beep") == 0) {
         Kitronik_Move_Motor.beepHorn()
     }
-    if (receivedString.compare("beeeeeeeep") == 0) {
-        music.playMelody("C5 C5 C5 C5 C5 C5 C5 C5 ", 120)
-    }
 })
 radio.onReceivedValue(function (name, value) {
     if (name.compare("rgt_spd") == 0) {
@@ -77,7 +74,9 @@ basic.forever(function () {
     }
     radio.sendValue("filterd distance", filtered_distance)
     if (filtered_distance < 20 && speed_left_motor + speed_right_motor > 0) {
-        Kitronik_Move_Motor.stop()
+        if (false) {
+            Kitronik_Move_Motor.stop()
+        }
         stop_blink(500)
         normal_lights()
     } else {
