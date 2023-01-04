@@ -40,6 +40,9 @@ function stop_blink (time_in_ms: number) {
     }
 }
 radio.onReceivedString(function (receivedString) {
+    if (receivedString.compare("off_lig") == 0) {
+        Kitronik_Move_Motor.brakeLightsOff()
+    }
     if (receivedString.compare("beep") == 0) {
         Kitronik_Move_Motor.beepHorn()
     }
