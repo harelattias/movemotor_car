@@ -41,7 +41,11 @@ function stop_blink (time_in_ms: number) {
 }
 radio.onReceivedString(function (receivedString) {
     if (receivedString.compare("off_lig") == 0) {
-        Kitronik_Move_Motor.brakeLightsOff()
+        moveMotorZIP.setColor(Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Black))
+        moveMotorZIP.show()
+    }
+    if (receivedString.compare("off_off") == 0) {
+        normal_lights()
     }
     if (receivedString.compare("beep") == 0) {
         Kitronik_Move_Motor.beepHorn()
@@ -77,9 +81,7 @@ basic.forever(function () {
     }
     radio.sendValue("filterd distance", filtered_distance)
     if (filtered_distance < 20 && speed_left_motor + speed_right_motor > 0) {
-        if (false) {
-            Kitronik_Move_Motor.stop()
-        }
+        Kitronik_Move_Motor.stop()
         stop_blink(500)
         normal_lights()
     } else {
